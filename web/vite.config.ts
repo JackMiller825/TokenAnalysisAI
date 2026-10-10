@@ -4,6 +4,7 @@ import path from "node:path";
 
 export default defineConfig({
   root: path.resolve(__dirname),
+  base: process.env.VITE_STATIC_DEMO === "true" ? "./" : "/",
   plugins: [react()],
   resolve: {
     alias: {

@@ -8,6 +8,7 @@
     "dev:api": "tsx watch server/index.ts",
     "dev:web": "vite --config web/vite.config.ts",
     "build": "vite build --config web/vite.config.ts && esbuild server/index.ts --bundle --platform=node --target=node22 --outfile=dist/server.js --external:@prisma/client --external:pdfkit",
+    "build:pages": "VITE_STATIC_DEMO=true vite build --config web/vite.config.ts",
     "start": "node dist/server.js",
     "test": "vitest run",
     "test:live": "vitest run tests/barstro.live.test.ts",

@@ -3,6 +3,7 @@ import { Activity, FlaskConical, GitCompare, History, Menu, Settings, Shield } f
 import { useState } from "react";
 import { useUi } from "@/store/ui";
 import { cn } from "@/lib/utils";
+import { isStaticDemo } from "@/lib/api";
 
 const GLOBAL = [
   { to: "/", label: "Dashboard", icon: Activity },
@@ -63,6 +64,7 @@ export function Shell() {
             </select>
           </label>
         </header>
+        {isStaticDemo ? <p className="border-b border-amber-400/30 bg-amber-400/10 px-4 py-2 text-sm text-amber-100">Published snapshot of the BARSTRO investigation. New chain analysis and API keys run on the local server, not on GitHub Pages.</p> : null}
         <main className="px-4 py-5 md:px-6"><Outlet /></main>
       </div>
     </div>

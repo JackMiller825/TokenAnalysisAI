@@ -35,7 +35,13 @@ export interface ProgressPayload {
   stages: { index: number; label: string; state: "pending" | "active" | "done" }[];
 }
 
+export const isStaticDemo = import.meta.env.VITE_STATIC_DEMO === "true";
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  if (isStaticDemo) {
+    const { staticRequest } = await import("./staticApi");
+    return staticRequest<T>(path, init);
+  }
   const response = await fetch(path, { headers: { "content-type": "application/json", ...(init?.headers || {}) }, ...init });
   if (!response.ok) {
     const body = await response.json().catch(() => ({ error: response.statusText }));

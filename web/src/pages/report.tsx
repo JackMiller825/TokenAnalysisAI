@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import type { SeriesMarker, UTCTimestamp } from "lightweight-charts";
-import { api, type AnalysisReport } from "@/lib/api";
+import { api, isStaticDemo, type AnalysisReport } from "@/lib/api";
 import { CATEGORY_COLOR, categoryLabel, formatPriceMove, formatRaw, formatUsd, shortAddr } from "@/lib/format";
 import { useUi } from "@/store/ui";
 import { Badge, Button, Card, Input, Progress, Switch } from "@/components/ui";
@@ -42,9 +42,18 @@ export function ReportPage() {
         </div>
         {report ? (
           <div className="flex flex-wrap gap-2">
-            <a className="inline-flex h-10 items-center rounded-md border border-border px-3 text-sm" href={`/api/analyses/${id}/export?format=json`}>JSON</a>
-            <a className="inline-flex h-10 items-center rounded-md border border-border px-3 text-sm" href={`/api/analyses/${id}/export?format=csv`}>CSV</a>
-            <a className="inline-flex h-10 items-center rounded-md border border-border px-3 text-sm" href={`/api/analyses/${id}/export?format=pdf`}>PDF</a>
+            {isStaticDemo ? (
+              <>
+                <button type="button" className="inline-flex h-10 items-center rounded-md border border-border px-3 text-sm" onClick={() => import("@/lib/staticApi").then((mod) => mod.downloadSnapshot(id, "json"))}>JSON</button>
+                <button type="button" className="inline-flex h-10 items-center rounded-md border border-border px-3 text-sm" onClick={() => import("@/lib/staticApi").then((mod) => mod.downloadSnapshot(id, "csv"))}>CSV</button>
+              </>
+            ) : (
+              <>
+                <a className="inline-flex h-10 items-center rounded-md border border-border px-3 text-sm" href={`/api/analyses/${id}/export?format=json`}>JSON</a>
+                <a className="inline-flex h-10 items-center rounded-md border border-border px-3 text-sm" href={`/api/analyses/${id}/export?format=csv`}>CSV</a>
+                <a className="inline-flex h-10 items-center rounded-md border border-border px-3 text-sm" href={`/api/analyses/${id}/export?format=pdf`}>PDF</a>
+              </>
+            )}
           </div>
         ) : null}
       </header>

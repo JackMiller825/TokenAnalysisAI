@@ -39,6 +39,14 @@ npm run dev
 - API: http://127.0.0.1:4721
 - Health: http://127.0.0.1:4721/api/health
 
+## Published site
+
+The GitHub Pages site is a static snapshot of the saved BARSTRO report: https://jackmiller825.github.io/TokenAnalysisAI/
+
+Hash routes keep the same build working after a custom domain is attached. Add the domain in the repository Pages settings and put that hostname in a `CNAME` file at `web/public/CNAME`. Do not commit a CNAME until the domain is ready.
+
+`npm run build:pages` builds that snapshot. Pushes to `main` on https://github.com/JackMiller825/TokenAnalysisAI run `.github/workflows/pages.yml`. Pages must use GitHub Actions as the source. The published site cannot start a new Ethereum job or store API keys. Those stay on the local API.
+
 `npm test` runs unit tests and a live BARSTRO reconstruction against Ethereum. The live test passes only when the chain returns the reference transactions.
 
 `npm run test:e2e` runs Playwright against a dev server that is already listening on port 4720. It checks navigation, the external-wallet form, and, when a completed BARSTRO report is stored, that a near-total price collapse is not labeled an exact −100% wipe.

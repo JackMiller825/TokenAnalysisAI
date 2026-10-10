@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { api } from "@/lib/api";
+import { api, isStaticDemo } from "@/lib/api";
 import { emptyContext, type LaunchContext, type WalletInput } from "../../../shared/types.ts";
 import { Button, Card, Input, Label, Switch, Textarea } from "@/components/ui";
 import { WalletEditor } from "@/components/widgets";
@@ -78,8 +78,9 @@ export function AnalyzePage() {
           </div>
         ) : null}
       </Card>
+      {isStaticDemo ? <p className="text-sm text-amber-200">GitHub Pages cannot read Ethereum. Use the saved BARSTRO report from the dashboard. Start a new analysis on the local server.</p> : null}
       {create.error ? <p className="text-sm text-red-300">{(create.error as Error).message}</p> : null}
-      <Button disabled={create.isPending || url.trim().length < 3} onClick={() => create.mutate()}>{create.isPending ? "Queueing…" : "Analyze launch"}</Button>
+      <Button disabled={isStaticDemo || create.isPending || url.trim().length < 3} onClick={() => create.mutate()}>{create.isPending ? "Queueing…" : "Analyze launch"}</Button>
     </div>
   );
 }

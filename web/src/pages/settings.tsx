@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, isStaticDemo } from "@/lib/api";
 import { Button, Card, Input, Label, Textarea } from "@/components/ui";
 
 export function SettingsPage() {
@@ -14,8 +14,8 @@ export function SettingsPage() {
     <div className="mx-auto max-w-3xl space-y-4">
       <h1 className="text-3xl font-semibold">Settings and API keys</h1>
       <Card className="space-y-2 p-4 text-sm">
-        <div>API health: {health.data ? (health.data.ok ? "Postgres and Redis are reachable." : `Degraded. Postgres: ${health.data.postgres}. Redis: ${health.data.redis}.`) : "Checking…"}</div>
-        <p className="text-muted-foreground">Public Ethereum RPCs are used when the list below is empty. Older launches need an archive endpoint. Keys stay on the server and are masked when read back.</p>
+        <div>API health: {isStaticDemo ? "Published site. Postgres and Redis are not running here." : health.data ? (health.data.ok ? "Postgres and Redis are reachable." : `Degraded. Postgres: ${health.data.postgres}. Redis: ${health.data.redis}.`) : "Checking…"}</div>
+        <p className="text-muted-foreground">{isStaticDemo ? "Keys are not saved in the browser bundle or on GitHub Pages. Add them in the local server settings when you run an analysis." : "Public Ethereum RPCs are used when the list below is empty. Older launches need an archive endpoint. Keys stay on the server and are masked when read back."}</p>
       </Card>
       <Card className="space-y-3 p-4">
         <Label>RPC URLs, comma-separated</Label>
@@ -28,7 +28,7 @@ export function SettingsPage() {
         <Input value={form.aiApiKey} onChange={(event) => setForm({ ...form, aiApiKey: event.target.value })} placeholder="Optional. Calculations stay deterministic." />
         <Label>Model</Label>
         <Input value={form.aiModel} onChange={(event) => setForm({ ...form, aiModel: event.target.value })} />
-        <Button onClick={() => save.mutate()} disabled={save.isPending}>Save settings</Button>
+        <Button onClick={() => save.mutate()} disabled={save.isPending || isStaticDemo}>Save settings</Button>
         {save.isSuccess ? <p className="text-sm text-emerald-300">Saved.</p> : null}
         {save.error ? <p className="text-sm text-red-300">{(save.error as Error).message}</p> : null}
       </Card>
