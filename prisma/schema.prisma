@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Analysis {
+  id                String    @id @default(cuid())
+  status            String
+  stage             String    @default("queued")
+  stageIndex        Int       @default(0)
+  progress          Float     @default(0)
+  progressDetail    String    @default("")
+  workCompleted     Int       @default(0)
+  workTotal         Int       @default(0)
+  indeterminate     Boolean   @default(false)
+  error             String?
+  cancelRequested   Boolean   @default(false)
+  chainId           Int       @default(1)
+  sourceUrl         String
+  pairAddress       String
+  tokenAddress      String?
+  quoteAddress      String?
+  tokenSymbol       String?
+  quoteSymbol       String?
+  dex               String?
+  deployerAddress   String?
+  fromBlock         Int?
+  toBlock           Int?
+  idempotencyKey    String?
+  context           Json
+  report            Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  completedAt       DateTime?
+  trades            Trade[]
+  auditLogs         AuditLog[]
+
+  @@index([status, createdAt])
+  @@index([pairAddress])
+  @@index([idempotencyKey])
+}
+
+model Trade {
+  id               String   @id @default(cuid())
+  analysisId       String
+  analysis         Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  txHash           String
+  logIndex         Int
+  blockNumber      Int
+  timestamp        DateTime
+  side             String
+  actor            String
+  recipient        String
+  category         String
+  tokenRaw         String
+  wethRaw          String
+  priceAfter       String
+  immediateImpact  Float?
+  reserveTokenRaw  String
+  reserveWethRaw   String
+  method           String?
+
+  @@unique([analysisId, txHash, logIndex])
+  @@index([analysisId, timestamp])
+  @@index([analysisId, actor])
+  @@index([analysisId, category])
+}
+
+model AuditLog {
+  id         String    @id @default(cuid())
+  analysisId String?
+  analysis   Analysis? @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  action     String
+  message    String
+  createdAt  DateTime  @default(now())
+
+  @@index([analysisId, createdAt])
+}
+
+model SavedWallet {
+  address   String
+  role      String
+  label     String   @default("")
+  notes     String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([address, role])
+}
+
+model AppSetting {
+  id              String   @id @default("default")
+  rpcUrls         String   @default("")
+  etherscanApiKey String   @default("")
+  aiBaseUrl       String   @default("")
+  aiApiKey        String   @default("")
+  aiModel         String   @default("")
+  updatedAt       DateTime @updatedAt
+}
