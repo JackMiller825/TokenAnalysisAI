@@ -40,3 +40,30 @@ test("an open report shows reserve evidence and does not claim an exact total pr
   await expect(page.getByText(/of the prior price remained/i)).toBeVisible();
   await expect(page.getByText(/moved the spot price by -100\.0%/i)).toHaveCount(0);
 });
+
+test("the candlestick chart draws without a price-scale crash", async ({ page, request }) => {
+  const list = await request.get("/api/analyses");
+  const rows = (await list.json()) as { id: string; status: string; tokenSymbol?: string }[];
+  const row = rows.find((item) => item.status === "completed" && item.tokenSymbol === "BARSTRO");
+  test.skip(!row, "No completed BARSTRO report is stored in this database.");
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto(`/reports/${row!.id}/chart`);
+  await expect(page.locator("canvas").first()).toBeVisible();
+  await expect.poll(async () => {
+    if (errors.some((message) => /unexpected base/i.test(message))) return "crashed";
+    return page.locator("canvas").evaluateAll((nodes) => {
+      for (const node of nodes) {
+        const canvas = node as HTMLCanvasElement;
+        const context = canvas.getContext("2d");
+        if (!context || canvas.width < 10 || canvas.height < 10) continue;
+        const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+        for (let index = 3; index < pixels.length; index += 16) {
+          if (pixels[index] > 0) return "painted";
+        }
+      }
+      return "blank";
+    });
+  }, { timeout: 5000 }).toBe("painted");
+  expect(errors.join("\n")).not.toMatch(/unexpected base/i);
+});

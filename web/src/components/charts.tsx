@@ -17,9 +17,15 @@ export function CandleChart({ candles, markers, onSelect }: { candles: Candle[];
     });
     const series: ISeriesApi<"Candlestick"> = chart.addCandlestickSeries({
       upColor: "#34d399", downColor: "#f87171", borderUpColor: "#34d399", borderDownColor: "#f87171", wickUpColor: "#34d399", wickDownColor: "#f87171",
-      priceFormat: { type: "custom", minMove: 1e-24, formatter: (price: number) => (price === 0 ? "0" : price.toExponential(3)) },
+      // minMove must be a decimal power of ten that stays inside a safe integer when inverted.
+      // 1e-24 makes the tick builder throw "unexpected base" and leaves the canvas blank.
+      priceFormat: { type: "custom", minMove: 1e-12, formatter: (price: number) => (Number.isFinite(price) && price !== 0 ? price.toExponential(3) : "0") },
     });
-    series.setData(candles.map((candle) => ({ time: candle.time as UTCTimestamp, open: candle.open, high: candle.high, low: candle.low, close: candle.close })));
+    const bars = candles
+      .filter((candle) => [candle.open, candle.high, candle.low, candle.close].every((price) => Number.isFinite(price)))
+      .map((candle) => ({ time: candle.time as UTCTimestamp, open: candle.open, high: candle.high, low: candle.low, close: candle.close }))
+      .sort((a, b) => a.time - b.time);
+    series.setData(bars);
     if (markers?.length) series.setMarkers(markers);
     chart.timeScale().fitContent();
     chart.subscribeClick((param) => {
